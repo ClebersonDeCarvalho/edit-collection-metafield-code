@@ -13,9 +13,7 @@ app.use("/webhooks/collections_create", express.raw({ type: "application/json" }
 const SHOP = process.env.SHOP;
 const ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
-/**
- * Classe SellerCodeGenerator (igual a do asset)
- */
+/*Cria o codigo*/
 class SellerCodeGenerator {
   constructor() {
     this.N = 26 * 26 * 10;
@@ -49,9 +47,8 @@ class SellerCodeGenerator {
   }
 }
 
-/**
- * Função que atualiza a coleção no Shopify
- */
+/*Função que atualiza a coleção no Shopify*/
+
 async function updateCollection(id, title, code) {
   const mutation = `
     mutation updateCollection($id: ID!, $code: String!, $title: String!) {
@@ -101,9 +98,8 @@ async function getSellerIdFromWebkul(handle) {
 }
 
 
-/**
- * Webhook que dispara quando uma coleção é criada
- */
+/*Webhook que dispara quando uma coleção é criada*/
+
 app.post("/webhooks/collections_create", async (req, res) => {
   try {
     const payload = JSON.parse(req.body.toString("utf8"));
