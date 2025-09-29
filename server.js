@@ -1,7 +1,9 @@
-const express = require("express");
-const fetch = require("node-fetch");
-const crypto = require("crypto");
-require("dotenv").config();
+import express from "express";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+import crypto from "crypto";
+
+dotenv.config();
 
 const app = express();
 
