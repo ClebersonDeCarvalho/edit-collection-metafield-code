@@ -84,6 +84,23 @@ async function updateCollection(id, title, code) {
   return await res.json();
 }
 
+async function getSellerIdFromWebkul(handle) {
+  const apiUrl = new URL("https://mvmapi.webkul.com/api/v2/public/sellers.json");
+  apiUrl.searchParams.append("shop_name", SHOP);
+  apiUrl.searchParams.append("filter", JSON.stringify({ handle }));
+
+  const response = await fetch(apiUrl);
+  if (!response.ok) throw new Error("Erro ao buscar seller na API Webkul");
+  const data = await response.json();
+
+  if (data.sellers && data.sellers.length > 0 && data.sellers[0].seller_id) {
+    return data.sellers[0].seller_id;
+  } else {
+    throw new Error(`Nenhum vendedor encontrado com handle ${handle}`);
+  }
+}
+
+
 /**
  * Webhook que dispara quando uma coleção é criada
  */
@@ -95,10 +112,10 @@ app.post("/webhooks/collections_create", async (req, res) => {
     const collectionId = `gid://shopify/Collection/${payload.id}`;
     const collectionTitle = payload.title || "Sem nome";
 
-    // aqui você poderia pegar seller_id de algum lugar (ex: Webkul)
-    const fakeSellerId = payload.id; // só exemplo
+    // Busca o seller_id real no Webkul usando o handle da coleção
+    const sellerId = await getSellerIdFromWebkul(payload.handle);
     const coder = new SellerCodeGenerator();
-    const sellerCode = coder.encodeID(fakeSellerId);
+    const sellerCode = coder.encodeID(sellerId);
 
     // limpa prefixo se já existir
     const cleanTitle = collectionTitle.replace(/^[A-Z]{2}[0-9]\s*\|\s*/, "");
