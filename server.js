@@ -14,9 +14,42 @@ const SHOP = process.env.SHOP;
 const ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 
 /*Cria o codigo*/
+// class SellerCodeGenerator {
+//   constructor() {
+//     this.N = 26 * 26 * 10;
+//     this.A = 101;
+//     this.B = 12345;
+//     this.letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//     this.A_inv = this.modInverse(this.A, this.N);
+//   }
+
+//   modInverse(a, m) {
+//     let m0 = m, x0 = 0, x1 = 1; a = ((a % m) + m) % m;
+//     if (m === 1) return 0;
+//     while (a > 1) { const q = Math.floor(a / m);[a, m] = [m, a % m];[x0, x1] = [x1 - q * x0, x0]; if (m === 0 && a !== 1) throw new Error("Inverso não existe."); }
+//     return (x1 + m0) % m0;
+//   }
+
+//   _unpack(codeNum) {
+//     const L1 = Math.floor(codeNum / (26 * 10)) % 26;
+//     const L2 = Math.floor(codeNum / 10) % 26;
+//     const N1 = codeNum % 10;
+//     return { L1, L2, N1 };
+//   }
+
+//   encodeID(id) {
+//     id = Number(id);
+//     if (!Number.isInteger(id) || id < 0) throw new Error("ID inválido para codificação.");
+//     const idMod = id % this.N;
+//     const codeNum = (idMod * this.A + this.B) % this.N;
+//     const { L1, L2, N1 } = this._unpack(codeNum);
+//     return this.letters[L1] + this.letters[L2] + String(N1);
+//   }
+// }
+
 class SellerCodeGenerator {
   constructor() {
-    this.N = 26 * 26 * 10;
+    this.N = 26 * 100; // 1 letra (26) × 100 números (00–99)
     this.A = 101;
     this.B = 12345;
     this.letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -24,17 +57,22 @@ class SellerCodeGenerator {
   }
 
   modInverse(a, m) {
-    let m0 = m, x0 = 0, x1 = 1; a = ((a % m) + m) % m;
+    let m0 = m, x0 = 0, x1 = 1; 
+    a = ((a % m) + m) % m;
     if (m === 1) return 0;
-    while (a > 1) { const q = Math.floor(a / m);[a, m] = [m, a % m];[x0, x1] = [x1 - q * x0, x0]; if (m === 0 && a !== 1) throw new Error("Inverso não existe."); }
+    while (a > 1) { 
+      const q = Math.floor(a / m);
+      [a, m] = [m, a % m];
+      [x0, x1] = [x1 - q * x0, x0]; 
+      if (m === 0 && a !== 1) throw new Error("Inverso não existe."); 
+    }
     return (x1 + m0) % m0;
   }
 
   _unpack(codeNum) {
-    const L1 = Math.floor(codeNum / (26 * 10)) % 26;
-    const L2 = Math.floor(codeNum / 10) % 26;
-    const N1 = codeNum % 10;
-    return { L1, L2, N1 };
+    const L1 = Math.floor(codeNum / 100) % 26; // pega a letra
+    const N2 = codeNum % 100; // pega os 2 dígitos
+    return { L1, N2 };
   }
 
   encodeID(id) {
@@ -42,8 +80,8 @@ class SellerCodeGenerator {
     if (!Number.isInteger(id) || id < 0) throw new Error("ID inválido para codificação.");
     const idMod = id % this.N;
     const codeNum = (idMod * this.A + this.B) % this.N;
-    const { L1, L2, N1 } = this._unpack(codeNum);
-    return this.letters[L1] + this.letters[L2] + String(N1);
+    const { L1, N2 } = this._unpack(codeNum);
+    return this.letters[L1] + String(N2).padStart(2, "0"); // exemplo: A54
   }
 }
 
